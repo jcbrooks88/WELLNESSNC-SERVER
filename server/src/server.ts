@@ -32,9 +32,10 @@ app.use(cookieParser());
 app.use(express.json());
 
 // Health check route
-app.get('/status', (_req, res) => {
+app.get('/status', (_req: express.Request, res: express.Response) => {
   res.json({ message: '🟢 Server is healthy', uptime: process.uptime() });
 });
+
 
 async function startServer() {
   try {
