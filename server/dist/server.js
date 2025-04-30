@@ -49,7 +49,7 @@ async function startServer() {
         });
         await server.start();
         server.applyMiddleware({
-            app,
+            app: app,
             path: '/graphql',
             cors: false, // <- Important since we handle CORS above
         });
