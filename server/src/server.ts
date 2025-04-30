@@ -7,7 +7,6 @@ import { resolvers } from './graphql/resolvers/index.js';
 import mongoose from 'mongoose';
 import { authenticate } from './utils/auth.js';
 import cors from 'cors';
-import { Application } from 'express';
 
 
 import cookieParser from 'cookie-parser';
@@ -16,7 +15,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 
-const app: Application = express();
+const app: express.Application = express();
 const PORT = ENV.PORT || 4000;
 
 
