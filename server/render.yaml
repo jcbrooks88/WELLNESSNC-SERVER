@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: wellness-server
+    env: node
+    region: oregon
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        value: https://wellness-rounds-nc.onrender.com
+      - key: MONGODB_URI
+        value: mongodb+srv://jcbrookstech:XJ5RfPy6GvKPC8BX@clusterbooksearchengine.fop7s.mongodb.net/googlebooks?retryWrites=true&w=majority&appName=ClusterBookSearchEngine
+      - key: JWT_SECRET
+        sync: false
+      - key: REFRESH_SECRET
+        sync: false

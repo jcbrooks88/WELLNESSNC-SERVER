@@ -55,9 +55,6 @@ async function startServer() {
         });
         if (process.env.NODE_ENV === 'production') {
             console.log('Production mode detected.');
-            // ⚠️ Comment this in real deployment
-            // await mongoose.connection.dropDatabase();
-            // logger.warn('⚠️ Database was dropped in production.');
         }
         app.listen(PORT, () => {
             console.log(`Server running at http://localhost:${PORT}${server.graphqlPath}`);
