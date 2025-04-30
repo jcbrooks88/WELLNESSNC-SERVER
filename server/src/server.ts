@@ -36,6 +36,15 @@ app.get('/status', (_req: express.Request, res: express.Response) => {
   res.json({ message: '🟢 Server is healthy', uptime: process.uptime() });
 });
 
+app.get('/seed', async (_req: express.Request, res: express.Response) => {
+  try {
+    await seedDatabase();
+    res.send('✅ Database seeded successfully.');
+  } catch (err) {
+    console.error('❌ Seeding failed:', err);
+    res.status(500).send('Seeding failed. Check logs.');
+  }
+});
 
 async function startServer() {
   try {
