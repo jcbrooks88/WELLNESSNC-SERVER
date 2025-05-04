@@ -18,13 +18,13 @@ export const userTypeDefs = gql`
   }
 
   type WorkHistory {
-  _id: ID!
-  position: String!
-  company: String!
-  startDate: String
-  endDate: String
-  description: String
-}
+    _id: ID!
+    position: String!
+    company: String!
+    startDate: String
+    endDate: String
+    description: String
+  }
 
   type ProfileComment {
     _id: ID!
@@ -35,6 +35,32 @@ export const userTypeDefs = gql`
   type AuthPayload {
     token: String!
     user: User!
+  }
+
+  type AuthTokenOnly {
+    token: String!
+  }
+
+  type RefreshTokenPayload {
+    accessToken: String!
+    refreshToken: String!
+  }
+
+  input UpdateUserProfileInput {
+    firstName: String
+    lastName: String
+    email: String
+    avatarUrl: String
+    bio: String
+    workHistory: [WorkHistoryInput]
+  }
+
+  input WorkHistoryInput {
+    company: String!
+    position: String!
+    startDate: String!
+    endDate: String
+    description: String
   }
 
   type Query {
@@ -51,27 +77,14 @@ export const userTypeDefs = gql`
       password: String!
     ): AuthPayload
 
-    updateUserProfile(input: UpdateUserProfileInput!): User
     login(email: String!, password: String!): AuthPayload
-    refreshAccessToken: AuthPayload
+
+    refreshAccessToken: AuthTokenOnly
+
+    updateUserProfile(input: UpdateUserProfileInput!): User
+
     updateAboutMe(aboutMe: String!): User
+
     addProfileComment(username: String!, text: String!): ProfileComment
   }
-  input UpdateUserProfileInput {
-    firstName: String
-    lastName: String
-    email: String
-    avatarUrl: String
-    bio: String
-    workHistory: [WorkHistoryInput]
-  }
-
-  input WorkHistoryInput {
-  company: String!
-  position: String!
-  startDate: String!
-  endDate: String
-  description: String
-}
-
 `;

@@ -1,91 +1,89 @@
 import express from 'express';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
 import { seedDatabase } from './seeds/seedDatabase.js';
 import connectDB from './mongoDB/config/connection.js';
 import { typeDefs } from './graphql/schemas/index.js';
 import { resolvers } from './graphql/resolvers/index.js';
 import mongoose from 'mongoose';
 import { authenticate } from './utils/auth.js';
+import refreshTokenRoute from './utils/refreshToken.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { ENV } from './utils/configLoader.js';
 import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 
 dotenv.config();
 
-const app: express.Application = express();
+const app = express();
 const PORT = ENV.PORT || 4000;
 
-// Enable trust proxy if behind a proxy (e.g., Render)
-app.set('trust proxy', 1);
-
-// CORS setup
+// ----- Middleware -----
 app.use(cors({
   origin: [
     ENV.FRONTEND_URL || 'http://localhost:5173',
-    'https://studio.apollographql.com'
+    'https://studio.apollographql.com',
   ],
   credentials: true,
 }));
 
-app.use(cookieParser());
 app.use(express.json());
+app.use((req, res, next) => cookieParser()(req, res, next));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/auth', refreshTokenRoute);
 
-// Health check route
-app.get('/status', (_req: express.Request, res: express.Response) => {
+// ----- Health check -----
+app.get('/status', (_req, res) => {
   res.json({ message: '🟢 Server is healthy', uptime: process.uptime() });
 });
 
-
-
+// ----- Start Server -----
 async function startServer() {
   try {
     await connectDB();
-    console.log("✅ MongoDB Ready");
+    console.log('✅ MongoDB Ready');
 
-    // Only seed in development
-    if (ENV.NODE_ENV !== 'production') {
-      console.log("🌱 Seeding database...");
-      await seedDatabase();
-      console.log("🌱 Database seeding completed");
-    }
+    console.log('🌱 Seeding database...');
+    await seedDatabase();
+    console.log('🌱 Database seeding completed');
 
-    const server = new ApolloServer({
+    const apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
-      persistedQueries: false,
-      context: ({ req, res }) => {
-        const user = authenticate(req);
-        if (!user) console.warn('No user found in request auth header');
-        else console.log('Authenticated user:', user);
-        return { req, res, user };
-      }
     });
 
-    await server.start();
-    server.applyMiddleware({
-      app: app as any,
-      path: '/graphql',
-      cors: false, // Already handled above
-    });
+    await apolloServer.start();
+
+    app.use('/graphql', expressMiddleware(apolloServer, {
+      context: async ({ req, res }: { req: express.Request; res: express.Response }) => {
+        const user = authenticate(req);
+        if (!user) {
+          console.warn('No user found in request auth header');
+        } else {
+          console.log('Authenticated user:', user);
+        }
+        return { req, res, user };
+      },
+    }));
+
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Production mode detected.');
+    }
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
+      console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
     });
 
-    // Handle graceful shutdown
     process.on('SIGINT', async () => {
       await mongoose.disconnect();
-      console.log('🔌 MongoDB disconnected on app termination');
+      console.log('MongoDB disconnected on app termination');
       process.exit(0);
     });
 
   } catch (error) {
-    if (error instanceof Error) {
-      console.error(`❌ Server startup failed: ${error.message}`);
-    } else {
-      console.error('❌ Server startup failed with an unknown error');
-    }
+    const err = error as Error;
+    console.error(`Server startup failed: ${err.message}`);
   }
 }
 

@@ -1,11 +1,12 @@
 import jwt from 'jsonwebtoken';
+import { Request } from 'express';
 
-export const authenticate = (req: any) => {
-  const authHeader = req?.headers?.authorization || '';
+export const authenticate = (req: Request) => {
+  const authHeader = req.headers?.authorization || '';
   const token = authHeader.replace('Bearer ', '').trim();
 
   if (!token) {
-    console.warn("No token provided.");
+    console.warn('No token provided.');
     return null;
   }
 
@@ -14,17 +15,18 @@ export const authenticate = (req: any) => {
     return (decoded as any).data;
   } catch (err: any) {
     if (err.name === 'TokenExpiredError') {
-      console.warn("Token has expired.");
+      console.warn('Token has expired.');
     } else {
-      console.error("JWT verification failed:", err.message);
+      console.error('JWT verification failed:', err.message);
     }
     return null;
   }
 };
 
-
+// ⚠️ Only use this in a frontend environment!
 export const clearToken = () => {
-  localStorage.removeItem('token');
-  // You can also clear user info or any related auth data
-  localStorage.removeItem('user');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }
 };

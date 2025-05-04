@@ -1,8 +1,14 @@
 import { authenticate } from '../utils/auth.js';
+import { Request, Response } from 'express';
 
-export const context = ({ req, res }: { req?: any, res?: any }) => {
+interface ContextParams {
+  req: Request;
+  res: Response;
+}
+
+export const context = async ({ req, res }: ContextParams) => {
   if (!req || !req.headers) {
-    console.warn("No request object found in context");
+    console.warn('No request object found in context');
     return { req, res, user: null };
   }
 

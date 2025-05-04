@@ -36,7 +36,20 @@ export interface IUser {
 
 export interface UserPayload {
   [x: string]: any;
+  _id: string;
   username: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
+  location?: string;
+  role?: string;
+  aboutMe?: string;
+  profileComments?: ProfileComment[];
+  comparePassword(password: string): Promise<boolean>;
+}
+
+export interface ProfileComment {
   _id: string;
+  text: string;
+  author: string; // or UserPayload if populated
 }
