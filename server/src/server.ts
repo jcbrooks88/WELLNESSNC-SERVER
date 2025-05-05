@@ -17,7 +17,8 @@ import bodyParser from 'body-parser';
 dotenv.config();
 
 const app = express();
-const PORT = ENV.PORT || 4000;
+// Use Render-assigned port or fallback
+const PORT = parseInt(process.env.PORT || ENV.PORT || '4000', 10);
 
 // ----- Middleware -----
 app.use(cors({
@@ -68,11 +69,11 @@ async function startServer() {
     }));
 
     if (process.env.NODE_ENV === 'production') {
-      console.log('Production mode detected.');
+      console.log('🚀 Production mode detected. Server is running...');
     }
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+      console.log(`🚀 Server ready on port ${PORT} — GraphQL at /graphql`);
     });
 
     process.on('SIGINT', async () => {
