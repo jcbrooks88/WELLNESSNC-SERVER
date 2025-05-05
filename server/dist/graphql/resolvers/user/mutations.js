@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { GraphQLError } from "graphql";
 import { User } from "../../../mongoDB/models/User.js";
