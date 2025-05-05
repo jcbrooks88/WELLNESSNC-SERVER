@@ -76,6 +76,15 @@ async function startServer() {
       console.log(`🚀 Server ready on port ${PORT} — GraphQL at /graphql`);
     });
 
+    app.get('/seed', async (_req, res) => {
+      try {
+        await seedDatabase();
+        res.status(200).send('Database seeded successfully!');
+      } catch (err) {
+        res.status(500).send('Seeding failed: ' + err);
+      }
+    });
+    
     process.on('SIGINT', async () => {
       await mongoose.disconnect();
       console.log('MongoDB disconnected on app termination');
